@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({
 
 function HomeComponent() {
   return (
-    <div className="p-2 text-blue-500">
+    <div className="p-2 text-pink-500">
       <h3>Welcome Home!</h3>
       <Button>Click me</Button>
     </div>
