@@ -11,11 +11,19 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as FormImport } from './routes/form'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
 import { Route as PokemonNameImport } from './routes/pokemon.$name'
+import { Route as FormStepImport } from './routes/form.$step'
 
 // Create/Update Routes
+
+const FormRoute = FormImport.update({
+  id: '/form',
+  path: '/form',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AboutRoute = AboutImport.update({
   id: '/about',
@@ -33,6 +41,12 @@ const PokemonNameRoute = PokemonNameImport.update({
   id: '/pokemon/$name',
   path: '/pokemon/$name',
   getParentRoute: () => rootRoute,
+} as any)
+
+const FormStepRoute = FormStepImport.update({
+  id: '/$step',
+  path: '/$step',
+  getParentRoute: () => FormRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -53,6 +67,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
+    '/form': {
+      id: '/form'
+      path: '/form'
+      fullPath: '/form'
+      preLoaderRoute: typeof FormImport
+      parentRoute: typeof rootRoute
+    }
+    '/form/$step': {
+      id: '/form/$step'
+      path: '/$step'
+      fullPath: '/form/$step'
+      preLoaderRoute: typeof FormStepImport
+      parentRoute: typeof FormImport
+    }
     '/pokemon/$name': {
       id: '/pokemon/$name'
       path: '/pokemon/$name'
@@ -65,15 +93,29 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
+interface FormRouteChildren {
+  FormStepRoute: typeof FormStepRoute
+}
+
+const FormRouteChildren: FormRouteChildren = {
+  FormStepRoute: FormStepRoute,
+}
+
+const FormRouteWithChildren = FormRoute._addFileChildren(FormRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/form': typeof FormRouteWithChildren
+  '/form/$step': typeof FormStepRoute
   '/pokemon/$name': typeof PokemonNameRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/form': typeof FormRouteWithChildren
+  '/form/$step': typeof FormStepRoute
   '/pokemon/$name': typeof PokemonNameRoute
 }
 
@@ -81,27 +123,31 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/form': typeof FormRouteWithChildren
+  '/form/$step': typeof FormStepRoute
   '/pokemon/$name': typeof PokemonNameRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/pokemon/$name'
+  fullPaths: '/' | '/about' | '/form' | '/form/$step' | '/pokemon/$name'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/pokemon/$name'
-  id: '__root__' | '/' | '/about' | '/pokemon/$name'
+  to: '/' | '/about' | '/form' | '/form/$step' | '/pokemon/$name'
+  id: '__root__' | '/' | '/about' | '/form' | '/form/$step' | '/pokemon/$name'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  FormRoute: typeof FormRouteWithChildren
   PokemonNameRoute: typeof PokemonNameRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  FormRoute: FormRouteWithChildren,
   PokemonNameRoute: PokemonNameRoute,
 }
 
@@ -117,6 +163,7 @@ export const routeTree = rootRoute
       "children": [
         "/",
         "/about",
+        "/form",
         "/pokemon/$name"
       ]
     },
@@ -125,6 +172,16 @@ export const routeTree = rootRoute
     },
     "/about": {
       "filePath": "about.tsx"
+    },
+    "/form": {
+      "filePath": "form.tsx",
+      "children": [
+        "/form/$step"
+      ]
+    },
+    "/form/$step": {
+      "filePath": "form.$step.tsx",
+      "parent": "/form"
     },
     "/pokemon/$name": {
       "filePath": "pokemon.$name.tsx"
